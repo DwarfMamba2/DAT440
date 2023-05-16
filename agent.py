@@ -9,11 +9,17 @@ class Agent(object):
         self.q_table = np.zeros((self.state_space, self.action_space))
         self.gamma = 0.95
         self.epsilon = 0.05
+        self.alpha = 0.9
+        
 
 
     def observe(self, observation, reward, done):
         #Add your code here
-
+        delta = reward + self.gamma * np.max(self.q_table[observation, :])- self.q_table[self.previous_state, self.previous_action]
+        self.q_table[self.previous_state, self.previous_action] = self.q_table[self.previous_state, self.previous_action] + self.alpha * delta
+        #print(self.q_table[self.previous_state, self.previous_action])
+        #print("delta: " + str(delta))
+ 
         pass
     def act(self, observation):
         #Add your code here
@@ -25,4 +31,6 @@ class Agent(object):
         else:
             action = np.argmax(self.q_table[observation,:])
 
+        self.previous_action = action
+        self.previous_state = observation
         return action
