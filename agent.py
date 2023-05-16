@@ -17,11 +17,10 @@ class Agent(object):
         pass
     def act(self, observation):
         #Add your code here
-
         if isinstance(observation, tuple):
             observation = observation[0]
         
-        if random.uniform(0,1) < self.epsilon+1:
+        if random.uniform(0,1) < self.epsilon or np.all(self.q_table[observation, :]) == self.q_table[observation, 0]:
             action = np.random.randint(self.action_space)
         else:
             action = np.argmax(self.q_table[observation,:])
