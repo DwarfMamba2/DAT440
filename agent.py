@@ -6,21 +6,43 @@ class Agent(object):
     def __init__(self, state_space, action_space):
         self.action_space = action_space
         self.state_space = state_space
-        self.q_table = np.zeros((self.state_space, self.action_space))
+
         self.gamma = 0.95
         self.epsilon = 0.0
-        self.alpha = 0.2
-        self.algorithm = "q-learning"
-        
 
+        self.algorithm = "double-q-learning" #q-learning, double-q-learning, sarsa or expected-sarsa
+        if self.algorithm == "q-learning":
+            self.alpha = 0.2
+            self.q_table = np.zeros((self.state_space, self.action_space))
+        elif(self.algorithm == "double-q-learning"):
+            self.alpha = 0.2
+            self.q1_table = np.zeros((self.state_space, self.action_space))
+            self.q2_table = np.zeros((self.state_space, self.action_space))
+        elif(self.algorithm == "sarsa"):
+            pass
+        elif(self.algorithm == "expected-sarsa"):
+            pass
+        else:
+            print("Please specify algorithm used")
+        
+            
 
     def observe(self, observation, reward, done):
         #Add your code here
         if(self.algorithm == "q-learning"):
             delta = reward + self.gamma * np.max(self.q_table[observation, :])- self.q_table[self.previous_state, self.previous_action]
             self.q_table[self.previous_state, self.previous_action] = self.q_table[self.previous_state, self.previous_action] + self.alpha * delta
-        elif(self.algoritm == "double-q-learning"):
-            pass
+        
+        elif(self.algorithm == "double-q-learning"):
+            if self.q_used == 1:
+                max_action = self.q1_table[observation, :].tolist().index(np.max(self.q1_table[observation, :]))
+                delta = reward + self.gamma * self.q2_table[observation, max_action] - self.q1_table[self.previous_state, self.previous_action]
+                self.q1_table[self.previous_state, self.previous_action] = self.q1_table[self.previous_state, self.previous_action] + self.alpha * delta
+            else:
+                max_action = self.q2_table[observation, :].tolist().index(np.max(self.q2_table[observation, :]))
+                delta = reward + self.gamma * self.q1_table[observation, max_action] - self.q2_table[self.previous_state, self.previous_action]
+                self.q2_table[self.previous_state, self.previous_action] = self.q2_table[self.previous_state, self.previous_action] + self.alpha * delta
+
         elif(self.algorithm == "sarsa"):
             pass
         elif(self.algorithm == "expected-sarsa"):
@@ -32,6 +54,15 @@ class Agent(object):
         #Add your code here
         if isinstance(observation, tuple):
             observation = observation[0]
+
+        if self.algorithm == "double-q-learning":
+            if random.randint(1,2) == 1:
+                self.q_table = self.q1_table
+                self.q_used = 1
+            else:
+                self.q_table = self.q2_table
+                self.q_used = 2
+
         
         if random.uniform(0,1) < self.epsilon or np.all(self.q_table[observation, :]) == self.q_table[observation, 0]:
             action = np.random.randint(self.action_space)
