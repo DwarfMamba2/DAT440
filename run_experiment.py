@@ -33,9 +33,10 @@ state_dim = env.observation_space.n
 agent = agentfile.Agent(state_dim, action_dim)
 
 observation = env.reset()
-for _ in range(20000): 
-    #plt.imshow(env.render())
-    #plt.show()
+for i in range(10000): 
+    if i > 100000+30:
+        plt.imshow(env.render())
+        plt.show()
     action = agent.act(observation) # your agent here (this currently takes random actions)
     observation, reward, done, truncated, info = env.step(action)
     rewards.append(reward)
@@ -44,10 +45,14 @@ for _ in range(20000):
     if done:
         observation, info = env.reset() 
 
+y = [] #time to reward
+sum = 0
+for i in range(len(rewards)):
+    sum += rewards[i]
+    y.append(sum/(i+1))
+    
 
-
-
-plt.plot(rewards)
+plt.plot(y)
 plt.show()
-print(agent.q_table)
+
 env.close()

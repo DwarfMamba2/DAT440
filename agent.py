@@ -8,19 +8,26 @@ class Agent(object):
         self.state_space = state_space
         self.q_table = np.zeros((self.state_space, self.action_space))
         self.gamma = 0.95
-        self.epsilon = 0.05
-        self.alpha = 0.9
+        self.epsilon = 0.0
+        self.alpha = 0.2
+        self.algorithm = "q-learning"
         
 
 
     def observe(self, observation, reward, done):
         #Add your code here
-        delta = reward + self.gamma * np.max(self.q_table[observation, :])- self.q_table[self.previous_state, self.previous_action]
-        self.q_table[self.previous_state, self.previous_action] = self.q_table[self.previous_state, self.previous_action] + self.alpha * delta
-        #print(self.q_table[self.previous_state, self.previous_action])
-        #print("delta: " + str(delta))
- 
-        pass
+        if(self.algorithm == "q-learning"):
+            delta = reward + self.gamma * np.max(self.q_table[observation, :])- self.q_table[self.previous_state, self.previous_action]
+            self.q_table[self.previous_state, self.previous_action] = self.q_table[self.previous_state, self.previous_action] + self.alpha * delta
+        elif(self.algoritm == "double-q-learning"):
+            pass
+        elif(self.algorithm == "sarsa"):
+            pass
+        elif(self.algorithm == "expected-sarsa"):
+            pass
+        else:
+            print("did not know what algorithm to use so I learnt nothing")
+
     def act(self, observation):
         #Add your code here
         if isinstance(observation, tuple):
