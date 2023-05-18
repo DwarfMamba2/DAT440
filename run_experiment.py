@@ -51,9 +51,6 @@ while episode < 2000:
         observation, info = env.reset()
         episode += 1 
 
-    if done:
-        observation, info = env.reset()
-
 y = []  # time to reward
 sum = 0
 for i in range(len(rewards)):
@@ -113,7 +110,7 @@ def plot_q_values_map(qtable, env, map_size):
 
 plot_q_values_map(agent.q_table, env, 4)
 
-# plt.plot(y)
-# plt.show()
+plt.plot(y)
+plt.show()
 
 env.close()
