@@ -10,13 +10,13 @@ class Agent(object):
         self.state_space = state_space
 
         self.gamma = 0.95
-        self.epsilon = 0.0
+        self.epsilon = 0.3
         self.alpha = 0.2
 
         # q-learning, double-q-learning, sarsa or expected-sarsa
-        #self.algorithm = "q-learning"
+        self.algorithm = "q-learning"
         #self.algorithm = "double-q-learning"
-        self.algorithm = "sarsa"
+        #self.algorithm = "sarsa"
         #self.algorithm = "expected-sarsa"
 
         if self.algorithm == "q-learning":
@@ -86,14 +86,14 @@ class Agent(object):
             observation = observation[0]
 
         if self.algorithm == "double-q-learning":
-            if random.randint(1, 2) == 1:
+            if random.randint(1, 3) == 1:
                 self.q_table = self.q1_table
                 self.q_used = 1
             else:
                 self.q_table = self.q2_table
                 self.q_used = 2
 
-        if random.uniform(0, 1) < self.epsilon or np.all(self.q_table[observation, :]) == self.q_table[observation, 0]:
+        if np.random.rand() < self.epsilon or np.all(list(map(lambda x: x == self.q_table[observation, 0], self.q_table[observation, :]))):
             action = np.random.randint(self.action_space)
         else:
             action = np.argmax(self.q_table[observation, :])
