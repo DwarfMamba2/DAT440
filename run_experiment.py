@@ -18,7 +18,7 @@ spec.loader.exec_module(agentfile)
 
 
 try:
-    env = gym.make(args.env, render_mode="rgb_array")
+    env = gym.make(args.env, is_slippery=False, render_mode="rgb_array")
     print("Loaded ", args.env)
 except:
     file_name, env_name = args.env.split(":")
@@ -38,7 +38,7 @@ agent = agentfile.Agent(state_dim, action_dim)
 
 observation = env.reset()
 episode = 0
-while episode < 2000:
+while episode < 10000:
     #if i > 100000+30:
     #    plt.imshow(env.render())
     #    plt.show()
