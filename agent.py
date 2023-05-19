@@ -75,7 +75,7 @@ class Agent(object):
                                                                                    self.previous_action] + self.alpha * delta
 
         elif (self.algorithm == "double-q-learning"):
-            if self.q_used == 1:
+            if np.random.rand() < 0.5:
                 max_action = self.q1_table[observation, :].tolist().index(
                     np.max(self.q1_table[observation, :]))
                 delta = reward + self.gamma * \
@@ -116,12 +116,8 @@ class Agent(object):
             observation = observation[0]
 
         if self.algorithm == "double-q-learning":
-            if random.randint(1, 2) == 1:
-                self.q_table = self.q1_table
-                self.q_used = 1
-            else:
-                self.q_table = self.q2_table
-                self.q_used = 2
+            self.q_table = self.q1_table + self.q2_table
+            
 
         if np.random.rand() < self.epsilon or np.all(list(map(lambda x: x == self.q_table[observation, 0], self.q_table[observation, :]))):
             action = np.random.randint(self.action_space)
