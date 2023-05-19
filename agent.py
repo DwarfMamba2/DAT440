@@ -91,22 +91,20 @@ class Agent(object):
                                                                                          self.previous_action] + self.alpha * delta
 
         elif (self.algorithm == "sarsa"):
-            next_action = self.act(observation)
-            delta = reward + self.gamma * \
-                self.q_table[observation, next_action] - \
-                self.q_table[self.previous_state, self.previous_action]
-            self.q_table[self.previous_state, self.previous_action] = self.q_table[self.previous_state,
-                                                                                   self.previous_action] + self.alpha * delta
+            next_action = self.q_table[observation, :].tolist().index(
+                np.max(self.q_table[observation, :]))
+            delta = reward+self.gamma * self.q_table[observation, next_action] - self.q_table[self.previous_state, self.previous_action] 
+            self.q_table[self.previous_state, self.previous_action] += self.alpha*delta
 
         elif (self.algorithm == "expected-sarsa"):
-            next_action = self.act(observation)
-            expected_value = np.sum(self.q_table[observation, :] * self.epsilon) + (
-                1 - self.epsilon) * self.q_table[observation, next_action]
+            next_action = self.q_table[observation, :].tolist().index(
+                np.max(self.q_table[observation, :]))
+            expected_value = np.sum(self.q_table[observation, :] * self.epsilon / self.action_space) + (
+                1 - self.epsilon) * np.max(self.q_table[observation, :])
             delta = reward + self.gamma * expected_value - \
                 self.q_table[self.previous_state, self.previous_action]
-            self.q_table[self.previous_state, self.previous_action] = self.q_table[self.previous_state,
-                                                                                   self.previous_action] + self.alpha * delta
-
+            self.q_table[self.previous_state,
+                         self.previous_action] += self.alpha * delta
         else:
             print("did not know what algorithm to use so I learnt nothing")
 

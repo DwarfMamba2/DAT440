@@ -19,7 +19,7 @@ spec.loader.exec_module(agentfile)
 
 
 try:
-    env = gym.make(args.env, is_slippery=True, render_mode="rgb_array")
+    env = gym.make(args.env, is_slippery=False, render_mode="rgb_array")
     print("Loaded ", args.env)
 except:
     file_name, env_name = args.env.split(":")
@@ -87,7 +87,7 @@ nrOfExperiments = 5
 ys = []
 q_tables = []
 for experiment in range(nrOfExperiments):
-    agent = agentfile.Agent(state_dim, action_dim, learner="q-learning", initialization="heuristic")
+    agent = agentfile.Agent(state_dim, action_dim, learner="sarsa", initialization="heuristic")
     rewards = []
     observation = env.reset()
     step = 0
