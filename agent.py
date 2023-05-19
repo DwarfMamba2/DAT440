@@ -16,10 +16,11 @@ class Agent(object):
         self.state_space = state_space
 
         self.gamma = 0.95
-        self.epsilon = 0.3
+        self.epsilon = 0.05
         self.alpha = 0.2
 
-        c = 0.1 # The q-value used in heuristic initilization, and scalar for random initilization (so could function as optimistic initialization).
+        c = 0.1 # The q-value used in heuristic initilization, 
+                # and scalar for random initilization (so could function as optimistic initialization).
         
         self.algorithm = learner # q-learning, double-q-learning, sarsa or expected-sarsa
 
@@ -38,6 +39,7 @@ class Agent(object):
                 print("For this run, defaulting to q-learning")
                 self.algorithm = "q-learning"
                 self.q_table = self.initializeQtable(initialization, c)
+
     def initializeQtable(self, strategy = "zero", c=0.1):
         """
         Initialize strategies include:

@@ -4,6 +4,7 @@ import importlib.util
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import copy
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--agentfile", type=str,
@@ -18,7 +19,7 @@ spec.loader.exec_module(agentfile)
 
 
 try:
-    env = gym.make(args.env, is_slippery=False, render_mode="rgb_array")
+    env = gym.make(args.env, is_slippery=True, render_mode="rgb_array")
     print("Loaded ", args.env)
 except:
     file_name, env_name = args.env.split(":")
@@ -28,35 +29,6 @@ except:
     )
     env = gym.make(env_name + "-v0")
     print("Loaded", args.env)
-
-
-rewards = []
-action_dim = env.action_space.n
-state_dim = env.observation_space.n
-
-agent = agentfile.Agent(state_dim, action_dim, learner="double-q-learning", initialization="random")
-
-observation = env.reset()
-episode = 0
-while episode < 10000:
-    #if i > 100000+30:
-    #    plt.imshow(env.render())
-    #    plt.show()
-    action = agent.act(observation) # your agent here (this currently takes random actions)
-    observation, reward, done, truncated, info = env.step(action)
-    rewards.append(reward)
-    agent.observe(observation, reward, done)
-    
-    if done:
-        observation, info = env.reset()
-        episode += 1 
-
-y = []  # time to reward
-sum = 0
-for i in range(len(rewards)):
-    sum += rewards[i]
-    y.append(sum/(i+1))
-
 
 def qtable_directions_map(qtable, map_size):  # Taken from gymnasium documentation
     """Get the best learned action & map it to arrows."""
@@ -107,10 +79,47 @@ def plot_q_values_map(qtable, env, map_size):
     fig.savefig(img_title, bbox_inches="tight")
     plt.show()
 
+action_dim = env.action_space.n
+state_dim = env.observation_space.n
 
-plot_q_values_map(agent.q_table, env, 4)
 
-plt.plot(y)
+nrOfExperiments = 5
+ys = []
+q_tables = []
+for experiment in range(nrOfExperiments):
+    agent = agentfile.Agent(state_dim, action_dim, learner="q-learning", initialization="heuristic")
+    rewards = []
+    observation = env.reset()
+    step = 0
+    while step < 100000:
+        #if i > 100000+30:
+        #    plt.imshow(env.render())
+        #    plt.show()
+        action = agent.act(observation) # your agent here (this currently takes random actions)
+        observation, reward, done, truncated, info = env.step(action)
+        rewards.append(reward)
+        agent.observe(observation, reward, done)
+        
+        if done:
+            observation, info = env.reset()
+        step += 1 
+
+    y = []  # time to reward
+    s = 0
+    movingWindow = 100 #100 is the max episode length
+    for i in range(len(rewards)):
+        low = max(0, i-movingWindow)
+        s += sum(rewards[low:i+1])/(i-low+1)
+        y.append(s/(i+1))
+    ys.append(y) #record experiment
+    q_tables.append(copy.deepcopy(agent.q_table))
+
+avgReward = [sum([ys[experiment][i] for experiment in range(nrOfExperiments)])/nrOfExperiments\
+            for i in range(len(ys[0]))]
+
+plot_q_values_map(q_tables[0], env, 4)
+
+plt.plot(avgReward)
 plt.show()
 
 env.close()
