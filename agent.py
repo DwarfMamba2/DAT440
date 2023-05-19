@@ -19,7 +19,7 @@ class Agent(object):
         self.epsilon = 0.05
         self.alpha = 0.2
 
-        c = 0.1 # The q-value used in heuristic initilization, 
+        c = 1 # The q-value used in heuristic initilization, 
                 # and scalar for random initilization (so could function as optimistic initialization).
         
         self.algorithm = learner # q-learning, double-q-learning, sarsa or expected-sarsa
@@ -33,7 +33,7 @@ class Agent(object):
             case "sarsa":
                 self.q_table = self.initializeQtable(initialization, c)
             case "expected-sarsa":
-                self.q_table = np.zeros((self.state_space, self.action_space))
+                self.q_table = self.initializeQtable(initialization, c)
             case _:
                 print("WARNING: Invalid algorithm. Please specify learning algorithm to be used used")
                 print("For this run, defaulting to q-learning")

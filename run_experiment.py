@@ -85,13 +85,13 @@ state_dim = env.observation_space.n
 
 
 
-learners = ["sarsa", "expected-sarsa", "q-learning", "double-q-learning"]
+learners = ["q-learning", "double-q-learning", "sarsa", "expected-sarsa"]
 for learner in learners:
     nrOfExperiments = 5
     ys = []
     q_tables = []
     for experiment in range(nrOfExperiments):
-        agent = agentfile.Agent(state_dim, action_dim, learner=learner, initialization="zero")
+        agent = agentfile.Agent(state_dim, action_dim, learner=learner, initialization="optimistic")
         rewards = []
         observation = env.reset()
         step = 0
@@ -123,7 +123,7 @@ for learner in learners:
     confRadius = np.asarray([1.96*np.std([ys[experiment][i] for experiment in range(nrOfExperiments)])/np.sqrt(nrOfExperiments)\
                 for i in range(len(ys[0]))])
 
-    #plot_q_values_map(q_tables[0], env, 4)
+    plot_q_values_map(q_tables[0], env, 4)
 
     fig, ax = plt.subplots()
     ax.plot(avgReward, label="Reward, moving average over 100 steps")
@@ -131,6 +131,6 @@ for learner in learners:
     ax.legend()
     ax.set_title(learner)
     #plt.show()
-    fig.savefig("Results/FrozenLake/"+learner+"ZeroNonSlip", bbox_inches="tight")
+    fig.savefig("Results/FrozenLake/Optimistic/"+learner+"Optimistic1", bbox_inches="tight")
 #print(variance)
 env.close()
