@@ -19,7 +19,7 @@ class Agent(object):
         self.epsilon = 0.05
         self.alpha = 0.2
 
-        c = 1 # The q-value used in heuristic initilization, 
+        c = 0.3 # The q-value used in heuristic initilization, 
                 # and scalar for random initilization (so could function as optimistic initialization).
         
         self.algorithm = learner # q-learning, double-q-learning, sarsa or expected-sarsa
