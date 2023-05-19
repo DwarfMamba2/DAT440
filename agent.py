@@ -59,8 +59,10 @@ class Agent(object):
                 return np.random.rand(self.state_space, self.action_space)
             case "heuristic": #[left, down, right, up]
                 return np.asarray([[-c, c, c, -c] for state in range(self.state_space)])
+            case "optimistic":
+                return c*np.zeros((self.state_space, self.action_space))
             case _:
-                print("WARNING: Invalid initilization strategy. Please choose between: 'zero', 'random', 'heuristic'")
+                print("WARNING: Invalid initilization strategy. Please choose between: 'zero', 'random', 'heuristic','optimistic'")
                 print("For this run, defaulting to zero initialization")
                 return np.zeros((self.state_space, self.action_space))
     def observe(self, observation, reward, done):
