@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import copy
+import riverswim
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--agentfile", type=str,
@@ -19,7 +20,7 @@ spec.loader.exec_module(agentfile)
 
 
 try:
-    env = gym.make(args.env, is_slippery=False, render_mode="rgb_array")
+    env = gym.make(args.env, is_slippery=False, render_mode="rgb_array", map_name="4x4")
     print("Loaded ", args.env)
 except:
     file_name, env_name = args.env.split(":")
@@ -83,43 +84,53 @@ action_dim = env.action_space.n
 state_dim = env.observation_space.n
 
 
-nrOfExperiments = 5
-ys = []
-q_tables = []
-for experiment in range(nrOfExperiments):
-    agent = agentfile.Agent(state_dim, action_dim, learner="sarsa", initialization="heuristic")
-    rewards = []
-    observation = env.reset()
-    step = 0
-    while step < 100000:
-        #if i > 100000+30:
-        #    plt.imshow(env.render())
-        #    plt.show()
-        action = agent.act(observation) # your agent here (this currently takes random actions)
-        observation, reward, done, truncated, info = env.step(action)
-        rewards.append(reward)
-        agent.observe(observation, reward, done)
-        
-        if done:
-            observation, info = env.reset()
-        step += 1 
 
-    y = []  # time to reward
-    s = 0
-    movingWindow = 100 #100 is the max episode length
-    for i in range(len(rewards)):
-        low = max(0, i-movingWindow)
-        s += sum(rewards[low:i+1])/(i-low+1)
-        y.append(s/(i+1))
-    ys.append(y) #record experiment
-    q_tables.append(copy.deepcopy(agent.q_table))
+learners = ["sarsa", "expected-sarsa", "q-learning", "double-q-learning"]
+for learner in learners:
+    nrOfExperiments = 5
+    ys = []
+    q_tables = []
+    for experiment in range(nrOfExperiments):
+        agent = agentfile.Agent(state_dim, action_dim, learner=learner, initialization="zero")
+        rewards = []
+        observation = env.reset()
+        step = 0
+        while step < 100000:
+            #if i > 100000+30:
+            #    plt.imshow(env.render())
+            #    plt.show()
+            action = agent.act(observation) # your agent here (this currently takes random actions)
+            observation, reward, done, truncated, info = env.step(action)
+            rewards.append(reward)
+            agent.observe(observation, reward, done)
+            
+            if done:
+                observation, info = env.reset()
+            step += 1 
 
-avgReward = [sum([ys[experiment][i] for experiment in range(nrOfExperiments)])/nrOfExperiments\
-            for i in range(len(ys[0]))]
+        y = []  # time to reward
+        s = 0
+        movingWindow = 100 #100 is the max episode length
+        for i in range(len(rewards)):
+            low = max(0, i-movingWindow)
+            s += sum(rewards[low:i+1])/(i-low+1)
+            y.append(s/(i+1))
+        ys.append(y) #record experiment
+        q_tables.append(copy.deepcopy(agent.q_table))
 
-plot_q_values_map(q_tables[0], env, 4)
+    avgReward = np.asarray([sum([ys[experiment][i] for experiment in range(nrOfExperiments)])/nrOfExperiments\
+                for i in range(len(ys[0]))])
+    confRadius = np.asarray([1.96*np.std([ys[experiment][i] for experiment in range(nrOfExperiments)])/np.sqrt(nrOfExperiments)\
+                for i in range(len(ys[0]))])
 
-plt.plot(avgReward)
-plt.show()
+    #plot_q_values_map(q_tables[0], env, 4)
 
+    fig, ax = plt.subplots()
+    ax.plot(avgReward, label="Reward, moving average over 100 steps")
+    ax.fill_between(list(range(len(avgReward))), avgReward-confRadius, avgReward+confRadius, alpha = 0.8, color = "red", label="95% confidence radius")
+    ax.legend()
+    ax.set_title(learner)
+    #plt.show()
+    fig.savefig("Results/FrozenLake/"+learner+"ZeroNonSlip", bbox_inches="tight")
+#print(variance)
 env.close()

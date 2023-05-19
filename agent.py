@@ -40,7 +40,7 @@ class Agent(object):
                 self.algorithm = "q-learning"
                 self.q_table = self.initializeQtable(initialization, c)
 
-    def initializeQtable(self, strategy = "zero", c=0.1):
+    def initializeQtable(self, strategy = "zero", c=0.3):
         """
         Initialize strategies include:
         'zero' initialization:      Initialize every state-action pair to 0. Unbiased
