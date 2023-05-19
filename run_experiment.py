@@ -34,7 +34,7 @@ rewards = []
 action_dim = env.action_space.n
 state_dim = env.observation_space.n
 
-agent = agentfile.Agent(state_dim, action_dim)
+agent = agentfile.Agent(state_dim, action_dim, learner="double-q-learning", initialization="random")
 
 observation = env.reset()
 episode = 0

@@ -5,7 +5,13 @@ import numpy as np
 class Agent(object):
     """The world's simplest agent!"""
 
-    def __init__(self, state_space, action_space):
+    def __init__(self, state_space, action_space, learner = "q-learning", initialization = "zero"):
+        """
+        learner could be: "q-learning", "double-q-learning", "sarsa", "expected-sarsa"
+
+        """
+        
+        
         self.action_space = action_space
         self.state_space = state_space
 
@@ -13,26 +19,48 @@ class Agent(object):
         self.epsilon = 0.3
         self.alpha = 0.2
 
-        # q-learning, double-q-learning, sarsa or expected-sarsa
-        self.algorithm = "q-learning"
-        #self.algorithm = "double-q-learning"
-        #self.algorithm = "sarsa"
-        #self.algorithm = "expected-sarsa"
+        c = 0.1 # The q-value used in heuristic initilization, and scalar for random initilization (so could function as optimistic initialization).
+        
+        self.algorithm = learner # q-learning, double-q-learning, sarsa or expected-sarsa
 
-        if self.algorithm == "q-learning":
-            self.alpha = 0.2
-            self.q_table = np.zeros((self.state_space, self.action_space))
-        elif (self.algorithm == "double-q-learning"):
-            self.alpha = 0.2
-            self.q1_table = np.zeros((self.state_space, self.action_space))
-            self.q2_table = np.zeros((self.state_space, self.action_space))
-        elif (self.algorithm == "sarsa"):
-            self.q_table = np.zeros((self.state_space, self.action_space))
-        elif (self.algorithm == "expected-sarsa"):
-            self.q_table = np.zeros((self.state_space, self.action_space))
-        else:
-            print("Please specify algorithm used")
-
+        match self.algorithm:
+            case "q-learning":
+                self.q_table = self.initializeQtable(initialization, c)
+            case "double-q-learning":
+                self.q1_table = self.initializeQtable(initialization, c)
+                self.q2_table = self.initializeQtable(initialization, c)
+            case "sarsa":
+                self.q_table = self.initializeQtable(initialization, c)
+            case "expected-sarsa":
+                self.q_table = np.zeros((self.state_space, self.action_space))
+            case _:
+                print("WARNING: Invalid algorithm. Please specify learning algorithm to be used used")
+                print("For this run, defaulting to q-learning")
+                self.algorithm = "q-learning"
+                self.q_table = self.initializeQtable(initialization, c)
+    def initializeQtable(self, strategy = "zero", c=0.1):
+        """
+        Initialize strategies include:
+        'zero' initialization:      Initialize every state-action pair to 0. Unbiased
+        'random' initialization:    Initialize every state-action pair to a random value. Biases 
+                                    exploraiton in a random direction which may result in more
+                                    exploration.
+        'heuristic' initialization: Initializes based on prior knowledge about the environment.
+                                    In our case, we set 'right' and 'down' = 1, and 'up', 'left' = 0
+                                    as we know that the goal is down and to the right of the start.
+                                    Can promote faster learning in expense of exploration.
+        """
+        match strategy:
+            case "zero":
+                return np.zeros((self.state_space, self.action_space))
+            case "random":
+                return np.random.rand(self.state_space, self.action_space)
+            case "heuristic": #[left, down, right, up]
+                return np.asarray([[-c, c, c, -c] for state in range(self.state_space)])
+            case _:
+                print("WARNING: Invalid initilization strategy. Please choose between: 'zero', 'random', 'heuristic'")
+                print("For this run, defaulting to zero initialization")
+                return np.zeros((self.state_space, self.action_space))
     def observe(self, observation, reward, done):
         # Add your code here
         if (self.algorithm == "q-learning"):
