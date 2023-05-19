@@ -116,7 +116,7 @@ class Agent(object):
             observation = observation[0]
 
         if self.algorithm == "double-q-learning":
-            if random.randint(1, 3) == 1:
+            if random.randint(1, 2) == 1:
                 self.q_table = self.q1_table
                 self.q_used = 1
             else:
