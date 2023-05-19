@@ -20,7 +20,7 @@ spec.loader.exec_module(agentfile)
 
 
 try:
-    env = gym.make(args.env, is_slippery=False, render_mode="rgb_array", map_name="4x4")
+    env = gym.make(args.env, is_slippery=True, render_mode="rgb_array", map_name="4x4")
     print("Loaded ", args.env)
 except:
     file_name, env_name = args.env.split(":")
